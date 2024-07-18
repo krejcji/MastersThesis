@@ -5,7 +5,7 @@ optimization_mode: 'max'
 wall_time: 84600  # In seconds
 budget: 20        # Number of full evaluations to run
 
-model: 'RNN' #'xresnet1d'
+model: 'RNN'
 
 data:
   name: 'PTB-XL-Shared'
