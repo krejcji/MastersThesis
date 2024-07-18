@@ -1,0 +1,18 @@
+\begin{table}
+\caption{Summary of the real-world experiments. A total of 7 experiments were performed. The columns describe the maximal number of epochs for training a single configuration, the total budget for a run of an experiment in terms of epochs, and the average runtime of each experiment in minutes. Only random search runs contribute to the average runtime. Note that the neural networks in \textit{cifar10-cnn} and \textit{svhn-cnn} experiments were trained on a CPU;\@ all other experiments used a GPU for training.}
+\label{tab:real_bench_summary}
+\begin{tabular}{lccc}
+\toprule
+ & Epochs & Budget & Avg.\ runtime (min) \\
+Benchmark &  &  &  \\
+\midrule
+cifar10-residual & 50 & 1000 & 561 \\
+cifar10-cnn & 75 & 1500 & 487 \\
+ptbxl-rnn & 50 & 1000 & 290 \\
+ptbxl-xResnet1d & 40 & 800 & 133 \\
+svhn-residual & 40 & 800 & 458 \\
+svhn-cnn & 70 & 1400 & 1825 \\
+xray-densenet & 20 & 400 & 954 \\
+\bottomrule
+\end{tabular}
+\end{table}

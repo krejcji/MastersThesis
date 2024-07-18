@@ -21,18 +21,18 @@
     \Comment{Initialization}
     \State{Randomly pick $\xv_n$}
     \State{$y_n \coloneq f(\xv_n) + \epsilon_n$}
-    \Comment{Evaluate the (expensive) objective function}
+    \Comment{Evaluate the objective function}
     \State{$\D \leftarrow \D \cup \{(\xv_n, y_n)\}$}
     \EndFor
     \While{Budget is left}
     \label{main:background:line:tpe-algo-start}
     \State{Compute $\gamma \leftarrow \Gamma(N)$ with $N \coloneq |\D| $}
-    \Comment{Section~\ref{main:algorithm-detail:section:gamma}~(Splitting algorithm)}
+    \Comment{(Splitting algorithm)}
     \State{Split $\D$ into $\Dl$ and $\Dg$}
     \State{Compute $\{w_n\}_{n=0}^{N+1} \leftarrow W(\D)$}
-    \Comment{See Section~\ref{main:algorithm-detail:section:weight}~(Weighting algorithm)}
+    \Comment{(Weighting algorithm)}
     \State{Compute $\bl \leftarrow B(\Dl), \bg \leftarrow B(\Dg)$}
-    \Comment{Section~\ref{main:algorithm-detail:section:bandwidth}~(Bandwidth selection)}
+    \Comment{(Bandwidth selection)}
     \State{Build $p(\xv \given  \Dl), p(\xv\given \Dg)$ based on Eq.~(\ref{eqn:tpe:kdes})}
     \Comment{Use $\{w_n\}_{n=0}^{N+1}$ and $\bl, \bg$}
     \State{Sample $\mathcal{S} \coloneq \{\xv_s\}_{s=1}^{N_s} \sim p(\xv\given \Dl)$}
@@ -40,7 +40,7 @@
     \label{main:background:line:tpe-algo-greedy}
     \Comment{The evaluations by the acquisition function}
     \State{$y_{N + 1} \coloneq f(\xv_{N + 1}) + \epsilon_{N+1}$}
-    \Comment{Evaluate the (expensive) objective function}
+    \Comment{Evaluate the objective function}
     \State{$\D \leftarrow \D \cup \{\xv_{N + 1}, y_{N + 1}\}$}
     \EndWhile
     \label{tpe-algo-end}

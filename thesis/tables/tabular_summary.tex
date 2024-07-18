@@ -1,0 +1,26 @@
+\begin{table}
+\caption{Summary of the tasks used in tabular experiments. A total of 15 tasks were drawn from 3 tabular benchmarks. The columns indicate the maximal number of epochs for training a single configuration, the total budget for the experiment in terms of epochs, and the average runtime of each experiment in minutes, which includes the training time. The average runtime is calculated just from the random search runs. Also, the training time is simply added to the sum, as retrieving information from the tables is nearly instant.}
+\label{tab:tab_summary}
+\begin{tabular}{lccc}
+\toprule
+ & Epochs & Budget & Avg.\ runtime (min) \\
+Benchmark &  &  &  \\
+\midrule
+fcnet-naval & 100 & 2000 & 26 \\
+fcnet-parkinsons & 100 & 2000 & 14 \\
+fcnet-protein & 100 & 2000 & 92 \\
+fcnet-slice & 100 & 2000 & 173 \\
+lcbench-Fashion-MNIST & 50 & 1000 & 303 \\
+lcbench-airlines & 50 & 1000 & 487 \\
+lcbench-albert & 50 & 1000 & 593 \\
+lcbench-christine & 50 & 1000 & 651 \\
+lcbench-covertype & 50 & 1000 & 643 \\
+lcbench-dionis & 50 & 1000 & 1423 \\
+lcbench-helena & 50 & 1000 & 104 \\
+lcbench-higgs & 50 & 1000 & 103 \\
+nas201-ImageNet16-120 & 200 & 4000 & 3788 \\
+nas201-cifar10 & 200 & 4000 & 1295 \\
+nas201-cifar100 & 200 & 4000 & 1307 \\
+\bottomrule
+\end{tabular}
+\end{table}

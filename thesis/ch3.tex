@@ -1,135 +1,320 @@
-\chapter{Experimental results and discussion}
+\chapter{Experiment definitions}
+% Introduction - a brief overview of what we cover here
+In this chapter, we will describe the experiments and how we performed them. There are two independent types of experiments described here --- tabular and real-world. We separate these two types in this chapter, as well as in the results because the nature of the tasks is different. In addition, the tabular benchmarks we use are not new. Each one has been used in the literature many times. What is new in this thesis is the specific combination of tabular benchmarks, algorithms, implementations and how the data are processed and analyzed. The real-world benchmarks, on the other hand, were designed and performed specifically for this thesis.
+% Hypothesis - experiment would be better.
+%We want to evaluate the performance of the algorithms on real-world tasks because the tabular benchmarks do not offer enough variety. Also, tabular benchmarks are often used during the development of the algorithms, so the newer algorithms could have a slight advantage. The goal is to compare the algorithms in multi-fidelity hyperparameter optimization and to provide recommendations based on the results. We will present the results one task at a time so that we get an insight into the behavior of the algorithms on the different tasks. In the end, we will conclude the experiments by aggregating the results.
 
-\section{Tabulated benchmarks}
+% Tabular benchmarks
+\section{Tabular benchmarks}
 
-\subsection{Experimental setup}
+We perform experiments using three different tabular benchmarks --- NAS-Bench-201~\cite{dong2020nasbench201}, LCBench~\cite{ZimLin2021a}, and FCNet~\cite{klein2019tabular}. The results from all three tabular benchmarks are then combined and analyzed together. Even though the NAS-Bench-201 is a neural architecture search benchmark, and it is not completely suitable for our experiments as such, we include it for variety and because it is commonly used in the hyperparameter optimization literature. It consists of three tasks only, which naturally gives the benchmark as a whole just a small weight in the combined results. The LCBench, on the other hand, contains over 35 datasets and tasks. The neural network architecture is the same for all the datasets and the tasks are similar, though. Therefore, we have selected just a subset of eight tasks from the LCBench. This helps to keep the combined results more diverse and balanced. We tried to select the more challenging tasks heuristically. All four tasks are used from FCNet. The full list of all tabular benchmark experiments can be found in Table~\ref{tab:tab_summary}. We will introduce the benchmarks in greater detail in the following text.
 
-% Tabular benchmarks and statistical tests
-In order to gain insight into the performance of the algorithms, first, we perform experiments on tabular benchmarks LCBench, FCNet, and NAS-Bench-201. The budget is limited by the number of epochs to 20 full evaluations. For example, all models in LCBench are trained for 50 epochs, so the total budget is 1000 epochs for all LCBench benchmarks. The reported metrics differ across datasets and benchmarks, so we convert all metrics to minimization and normalize the values into the range from 0 to 1 for each benchmark. We perform 30 repetitions for all benchmarks and algorithms and take the average. In accordance with the best practices for statistical comparison of algorithms across many datasets by Demšar~\cite{demvsar2006statistical}, we use the Friedman test to test the null hypothesis that all algorithms are equivalent. If the Friedman test rejects the null hypothesis, we follow up with the Wilcoxon signed-rank post-hoc test corrected with the Holm method to determine which algorithms perform differently. These tests are recommended because of several properties. They are non-parametric and have almost no assumptions on the data distribution. Since we cannot guarantee normality and homogeneity of variance of the results, it is safer not to use parametric tests like ANOVA.\@ The Wilcoxon test ranks the data internally, so the magnitude of values matters, but only to a limited extent, which is also desired.
+\subfile{./tables/tabular_summary.tex}
 
-% Algorithms
-Because tabulated benchmarks are relatively cheap to evaluate, we can choose a wide array of algorithms for the comparison. We include several baseline model-less algorithms so that we see what results can be achieved without a surrogate model. Most of the model-based algorithms are based on the Gaussian process Bayesian optimization with the exception of DEHB.\@ \xxx{Maybe implement TPE-based, or RF-based model into Syne-tune as well?} We chose the following algorithms for the comparison:
+\paragraph{NAS-Bench-201}
+The NAS-Bench-201~\cite{dong2020nasbench201} contains 15625 multi-fidelity configurations of computer vision architectures evaluated on 3 datasets (CIFAR10, CIFAR100, ImageNet-16-120). The search space consists of 6 categorical variables, each having 5 of the same options ($3\times3$ convolution layer, Average Pooling layer, etc.). Through these variables, a cell that is used to form a neural network is optimized.
+
+\paragraph{LCBench}
+Another popular tabular benchmark is the LCBench~\cite{ZimLin2021a}. The LC in the name stands for \textit{learning curve}, which means that LCBench tracks the performance of configurations throughout the training. It contains training data for 2000 different configurations across different MLP funnel-shaped nets and their hyperparameters. Each configuration is evaluated on 35 datasets over 50 epochs. The task is to optimize 7 hyperparameters, 4 float and 3 integer. The hyperparameters include a learning rate, a weight decay, and a number of layers. The complete list of all hyperparameters and their values is provided in Table~\ref{tab:lc}.
+
+\begin{table}
+    \begin{tabular}{lc}
+        \toprule
+        Hyperparameter & Values \\
+        \midrule
+        Batch size & $\{16,\ldots , 512\}$ \\
+        Learning rate & $\interval{1\mathrm{e}{-4}}{1\mathrm{e}{-1}}$ \\
+        Momentum & $\interval{0.1}{0.99}$ \\
+        Weight decay & $\interval{1\mathrm{e}{-5}}{1\mathrm{e}{-1}}$ \\
+        Layers & $\{1,2,3,4,5\}$ \\
+        Max units/layer & $\{64, \ldots , 1024\}$ \\
+        Dropout & $\interval{0.0}{1.0}$ \\
+        \bottomrule
+        \end{tabular}
+        \caption{The search space of the LCBench benchmark.}
+        \label{tab:lc}
+    \end{table}
+
+\paragraph{FCNet}
+The FCNet~\cite{klein2019tabular} multi-fidelity benchmark contains 62208 configurations evaluated on 4 datasets. The base architecture is an MLP feed-forward neural network with two fully connected layers followed by a linear output layer. The search space includes 4 architectural choices (number of units and activation function for both layers), and 5 other optimizer and regularization hyperparameters. We list the hyperparameters and their values in Table~\ref{tab:fcnet}. The authors chose to discretize the search space and performed an exhaustive evaluation of all 62208 configurations. Each configuration was trained 4 times with full learning curves provided as well.
+
+\begin{table}
+    \centering
+\begin{tabular}{lc}
+    \toprule
+    Hyperparameter & Values \\
+    \midrule
+    Learning rate & $\{0.0005, 0.001, 0.005, 0.01, 0.05, 0.1\}$ \\
+    Batch size & $\{8, 16, 32, 64\}$ \\
+    LR schedule & $\{\text{cosine}, \text{fix} \}$ \\
+    Activation L1 & $\{\text{relu}, \text{tanh} \}$ \\
+    Activation L2 & $\{\text{relu}, \text{tanh} \}$ \\
+    L1 size & $\{8, 16, 32, 64, 128, 256, 512\}$ \\
+    L2 size & $\{8, 16, 32, 64, 128, 256, 512\}$ \\
+    Dropout L1 & $\{0.0, 0.3, 0.6\}$ \\
+    Dropout L2 & $\{0.0, 0.3, 0.6\}$ \\
+    \bottomrule
+    \end{tabular}
+    \caption{The search space of the FCNet benchmark.}
+    \label{tab:fcnet}
+\end{table}
+
+%\clearpage
+% Real-world experiments
+\section{Real-world experiments}
+For the evaluation of the algorithms on real-world problems, we chose four datasets and five deep learning models to perform seven experiments (see Table~\ref{tab:real_bench_summary}). In the following, we will describe the process. First, a dataset was chosen. Then, we considered which models were suitable for the dataset. We often used the literature to help us choose the right model. After a dataset and a model were chosen, we started adding hyperparameters to optimize. Optimizer hyperparameters were included in every experiment. Then we often tried to parametrize the neural network so that the capacity can be tweaked with a few high-level hyperparameters. We did not want to end up doing a Neural Architecture Search, so we often made one hyperparameter for the depth of the network and one for the width. Then we usually added regularization hyperparameters, especially for the smaller datasets. Finally, for some tasks, we added hyperparameters for data augmentation.
+
+% How we chose hyperparameter ranges
+After the hyperparameters were chosen, we set the ranges for the individual hyperparameters. We used previous experience to set bounds that we thought could contain a good solution and widened the range a bit. Note that we did not carefully design the hyperparameter spaces to achieve some specific goal (e.g.\ make the search artificially hard). We wanted the experiments to be close to the real world, albeit on the simpler side. One thing that we did extra was check if the best solutions were not on the boundary of the hyperparameter range and widen the range if needed. For the capacity hyperparameters, we were limited in the size of the model by the space needed for checkpointing. We set the maximal number of epochs manually, selecting a slightly larger value than needed for convergence. In the rest of this section, we will introduce the datasets we used, then the machine learning models, and finally, we will introduce the experiments.
+
+\subfile{./tables/real_bench_summary.tex}
+
+
+
+% Datasets
+\subsection{Datasets}
+We chose three image datasets and one time-series dataset for our experiments. The CIFAR-10 and SVHN represent the standard datasets often used in the literature, while the PTB-XL and the ChestX-ray14 were chosen for novelty, as we wanted to test the tuning algorithms in a domain that is rarely represented in the hyperparameter optimization literature. Now, we will briefly introduce the datasets.
+
+\paragraph{CIFAR10}
+The CIFAR-10 dataset is a well-known collection of images~\cite{krizhevsky2009learning}. It comprises $60000$ $32\times 32$ color images, with $6000$ images per each of 10 classes. The dataset is usually split into $50000$ training images and $10000$ test images. % TODO: Our split.
+
+\paragraph{SVHN}
+The SVHN is another popular image classification dataset~\cite{netzer2011reading}. It comes from a real-world problem of recognizing digits in natural scene images. Therefore, there are $10$ classes, one for each digit. It consists of $73257$ images for training, $26032$ images for testing, and an additional $531131$ less difficult samples. The resolution of the images is $32\times 32$, with $3$ color channels per image.
+
+% Introduction of the dataset
+\paragraph{PTB-XL}
+ The PTB-XL~\cite{wagner2020ptb} dataset consists of $21837$ clinical $12$-lead ECGs annotated by up to two cardiologists with ECG statements. There are signals at two sampling frequencies --- \SI{500}{\hertz} and \SI{100}{\hertz}. We use the downsampled \SI{100}{\hertz} signal. The samples, or records, are 10 seconds long. For training, the whole length of the record is not used. A random sample of length 256 is taken from the record every time it is accessed. This helps with overfitting, but introduces noise into the training. The task is a multi-label classification where the goal is to assign 1 or more of the 5 diagnostic superclasses to the ECG signal.
+
+\paragraph{ChestX-ray14}
+The last dataset contains medical imaging data~\cite{wang2017chestx}. It consists of $112120$ frontal-view X-ray images of $30805$ unique patients. The images are single channel only and their native resolution is $1024\times 1024$. We use images downsampled to a resolution of $224\times 224$. The task is a multi-label classification of images into 14 classes, representing text-mined pathologies.
+
+
+\subsection{Models}
+
+\paragraph{CNN}
+The model we simply call CNN represents a standard convolutional network. First, the input passes through a series of convolutional layers with kernel size $3\times 3$ and stride $2$. Then, there are two fully connected layers. The output of the second fully connected layer is the output of the network. Optionally, batch normalization is applied after each convolutional layer, or a dropout layer can be inserted between the convolutional layers and the first fully connected layer.
+
+\paragraph{Residual CNN}
+Our implementation of the residual network is based on the ResNet~\cite{he2016deep}, but it differs in some aspects. It uses a residual block, which consists of two stacked $3\times 3$ convolutional layers with batch normalization, followed by a residual connection. The residual connection copies the input of the block, which is then added to the output of the convolutional layers if the stride is $1$ or the number of channels does not change. If stride is $2$ or the number of channels does change, then the residual connection contains $1\times 1$ convolution with a matching number of output channels and stride, so that the output can be added to the output of the $3\times 3$ convolutional layers. We should also note that if the residual block has stride $2$, only the first $3\times 3$ convolution has stride $2$. The residual blocks are stacked sequentially, followed by an average pooling and two fully connected layers.
+
+\paragraph{xResnet1d}
+The xResnet architecture, proposed by He et al.~\cite{he2018xresnet}, emerged as an evolution of the ResNet architecture. It can be described as a ResNet enhanced by a collection of many small tweaks. We use a one-dimensional version of the network because we classify one-dimensional time-series data with the network. We use the implementation of xResnet1d by \citet{xresnet2023github}.
+
+\paragraph{DenseNet}
+Another widely used convolutional network architecture is the DenseNet~\cite{huang2017densely}. Its distinctive feature is that each layer is connected to every other layer in a feed-forward fashion. This results in a highly efficient architecture, which is why we chose it for one of the experiments. We use the implementation provided in the TorchXRayVision library~\cite{Cohen2022xrv}.
+
+\paragraph{RNN}
+Our implementation of the recurrent neural network consists of one or more LSTM or GRU layers stacked sequentially, followed by a dropout layer and a fully connected layer. The recurrent layers can be bidirectional.
+
+
+\subsection{Experiments}
+We will describe the experiments here. If we do not say otherwise, the networks are trained using the AdamW optimizer with a cosine annealing learning rate decay schedule. We always optimize the learning rate hyperparameter of the optimizer and the $\eta_{min}$. The latter is a hyperparameter of a cosine decay. Its value denotes the minimum learning rate as a fraction of the starting learning rate. We number the experiments so that it is possible to quickly transition from results to definitions and vice versa.
+
+\subsubsection{1.\ cifar10-cnn}
+% Introduction + training
+In the first experiment, we combine the CIFAR10 dataset with the CNN model. The network is trained for up to 75 epochs. We compare the algorithms in classification accuracy on the validation set. The optimization problem consists of eight hyperparameters (see Table~\ref{tab:cifar10_simple}), four real-valued, three integer-valued, and one binary. In addition to the optimizer hyperparameters, regularization hyperparameters including a dropout and a label smoothing were optimized. The binary hyperparameter is batch normalization, which could also be seen as a regularization hyperparameter. Finally, hyperparameters controlling the size of the model are optimized. These include a number of layers, a multiplier for the number of channels, and a number of artificial neurons in the fully connected layer. The images in the training set go through a data augmentation. They are resized at random and cropped, also at random. Then a horizontal flip is applied with a probability of $0.5$.
+
+% CIFAR10_simple
+\begin{table}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        Hyperparameter & Values \\
+        \midrule
+        Learning rate & $\interval{1\mathrm{e}{-4}}{1\mathrm{e}{-1}}$ \\
+        $\eta_{min}$ & $\interval{0.0}{1.0}$ \\
+        FC neurons & $\{8,\ldots , 128\}$ \\
+        Channels multiplier & $\{1, \ldots , 16\}$ \\
+        Conv layers & $\{1,2,3, 4\}$ \\
+        Dropout & $\interval{0.0}{0.8}$ \\
+        Label smoothing & $\interval{0.0}{0.3}$ \\
+        Batch norm & $\{True, False\}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{The search space of \textit{cifar10-cnn} and \textit{svhn-cnn} experiments.}
+    \label{tab:cifar10_simple}
+\end{table}
+
+\subsubsection{2.\ cifar10-residual}
+Next, we pair the CIFAR10 dataset with a ResNet-like architecture. We set the maximal number of epochs to 50. Again, the metric is classification accuracy. The test set is not needed for anything else, so we use it as a validation set. Seven hyperparameters are optimized (see Table~\ref{tab:cifar10_residual}) --- learning rate, $\eta_{min}$, size of the fully connected layer, channels multiplier, depth, weight decay, and label smoothing. The channels multiplier hyperparameter widens the network and the depth hyperparameter increases the number of residual blocks. The layers do not scale one to one with the depth hyperparameter, but closely to linear. The depth starts at 10 convolutional layers at 1 and ends at 48 convolutional layers when the depth is equal to 5. The base multiplier for the number of channels is 8. This base value gets multiplied by the channel multiplier hyperparameter, which is then used in the first residual block. Every time there is a residual block with stride $2$, the number of channels gets multiplied by $2$. The values of the channels multiplier hyperparameter start at $1$ and go up to $4$. The images undergo the same data augmentation as in the previous experiment.
+
+% CIFAR10_residual
+\begin{table}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        Hyperparameter & Values \\
+        \midrule
+        Learning rate & $\interval{1\mathrm{e}{-5}}{1\mathrm{e}{-1}}$ \\
+        $\eta_{min}$ & $\interval{0.0}{1.0}$ \\
+        FC neurons & $\{8,\ldots , 128\}$ \\
+        Channels multiplier & $\{1, 2, 3 , 4\}$ \\
+        Depth & $\{1, \ldots , 5\}$ \\
+        Weight decay & $\interval{1\mathrm{e}{-6}}{1\mathrm{e}{-1}}$ \\
+        Label smoothing & $\interval{0.0}{0.4}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{The search space of the \textit{cifar10-residual} experiment.}
+    \label{tab:cifar10_residual}
+\end{table}
+
+% learning rate, eta_min, FC neurons, channels multiplier, depth, weight decay, label smoothing
+
+\subsubsection{3.\ svhn-cnn}
+The setup of this experiment is similar to the \textit{cifar10-cnn} experiment. The maximal number of epochs is 70 in this case. The neural network and hyperparameters stay identical (see Table~{\ref{tab:cifar10_simple}}). Another difference is in the data augmentation. The training images are first rotated by up to 10 degrees, then they are translated by up to $0.1$ of their width on both axes and finally, they are scaled by a factor ranging from $0.8$ to $1.1$, which is sampled at random.
+
+
+\subsubsection{4.\ svhn-residual}
+In this experiment, the SVHN dataset is used to train the residual network with the SGD optimizer with momentum (see Table~\ref{tab:svhn_residual}). Therefore, the optimizer hyperparameters contain momentum in addition to the learning rate and $\eta_{min}$. The regularization includes weight decay and label smoothing. The network size hyperparameters are identical to the \textit{cifar10-residual} experiment. What is not identical to that experiment are the additional data augmentation hyperparameters --- rotation, translation factor, scale factor, scale offset, and sharpness factor. Rotation takes a value between $0$ and $30$. It serves as an upper bound on the randomly sampled rotation of the input image. The translation factor can have values from $0.0$ to $0.3$, and it is an upper bound on the random translation as the fraction of the image width. Scale factor $s$ determines the range of random scaling of the image from $1-s$ to $1+s$. The scale offset, ranging from $0.0$ to $0.2$, is subtracted from both of these values so that there is a bias toward scaling the image down. It is meant to prevent overly scaling and then cropping the images.
+
+% SVHN_residual
+\begin{table}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        Hyperparameter & Values \\
+        \midrule
+        Learning rate & $\interval{1\mathrm{e}{-5}}{1\mathrm{e}{-1}}$ \\
+        $\eta_{min}$ & $\interval{0.0}{1.0}$ \\
+        Momentum & $\interval{0.0}{0.99}$ \\
+        FC neurons & $\{8,\ldots , 128\}$ \\
+        Depth & $\{1, \ldots , 5\}$ \\
+        Channels multiplier & $\{1, 2, 3, 4\}$ \\
+        Weight decay & $\interval{1\mathrm{e}{-6}}{1\mathrm{e}{-1}}$ \\
+        Label smoothing & $\interval{0.0}{0.4}$ \\
+        Rotation & $\{0, \ldots , 30\}$ \\
+        Translation factor & $\interval{0.0}{0.3}$ \\
+        Scale factor & $\interval{0.0}{0.3}$ \\
+        Scale offset & $\interval{0.0}{0.2}$ \\
+        Sharpness factor & $\interval{0.0}{2.0}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{The search space of the \textit{svhn-residual} experiment.}
+    \label{tab:svhn_residual}
+\end{table}
+
+% PTB-XL
+\subsubsection{5.\ ptbxl-rnn}
+% We reviewed the literature~\cite{strodthoff2020deep} to see which models perform well on this dataset and chose an RNN architecture and a xResNet1d architecture.
+
+% Hyperparameters
+As the PTB-XL contains sequential time-series data, RNN architecture was the first choice. The network is trained for 50 epochs, and the area under the ROC curve on the validation set is optimized by the hyperparameter optimization algorithms. This metric is used for all multi-label classification tasks. In total, the search space consists of 11 hyperparameters (see Table~\ref{tab:ptbxl_rnn}). In this experiment, we added another option for the learning rate decay schedule --- reduce the learning rate on a plateau. If it is used, the $\eta_{min}$ hyperparameter has no effect, because the learning rate is automatically reduced when the validation loss does not improve for several epochs. There is also an additional choice for the optimizer, the RMSprop. We optimize hyperparameters specific to RNNs such as the RNN cell type and whether the network should be bidirectional. Hyperparameters that control the size of the network, the number of layers and the number of hidden units per layer, are optimized as well. If the network is bidirectional, the number of hidden units is halved, so that the size of the network is similar to the unidirectional case. Finally, we optimize the regularization hyperparameters dropout and weight decay.
+
+% PTB-XL_RNN
+\begin{table}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        Hyperparameter & Values \\
+        \midrule
+        Optimizer & $\{ \text{AdamW}, \text{RMSprop}\}$ \\
+        Learning rate & $\interval{1\mathrm{e}{-4}}{1\mathrm{e}{-1}}$ \\
+        Weight decay & $\interval{0.0}{0.2}$ \\
+        Decay & \{cosine, ReduceLROnPlateau\} \\
+        $\eta_{min}$ & $\interval{1\mathrm{e}{-5}}{0.99}$ \\
+        RNN type & \{LSTM, GRU\} \\
+        Bidirectional & $\{True, False\}$ \\
+        RNN hidden & $\{64,\ldots , 512\}$ \\
+        RNN layers & $\{1, 2, 3\}$ \\
+        RNN dropout & $\interval{0.0}{0.6}$ \\
+        Dropout & $\interval{0.0}{0.6}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{The search space of the \textit{ptbxl-rnn} experiment.}
+    \label{tab:ptbxl_rnn}
+\end{table}
+
+\subsubsection{6.\ ptbxl-xResnet1d}
+We selected the xResnet1d architecture as the best-performing architecture on the PTB-XL dataset in the literature~\cite{strodthoff2020deep}. The hyperparameter optimization algorithm can choose between xResnet1d18, xResnet1d50, and the largest xResnet1d101 networks. There is also the original f-number hyperparameter, which refers to the specific sequence of residual block widths used in the network from the PTB-XL challenge paper. This sequence progressively scales up the number of channels, unlike the default sequence. Then there are optimizer hyperparameters and regularization hyperparameters. As a regularization, two dropout values can be altered --- the model dropout used after the residual blocks and the FC dropout used after the first fully connected layer. All hyperparameters are summarized in Table~\ref{tab:ptbxl_xresnet}.
+
+% PTB-XL_xResnet1d
+\begin{table}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        Hyperparameter & Values \\
+        \midrule
+        Model size & \{xresnet1d18, xresnet1d50, xresnet1d101\} \\
+        Learning rate & $\interval{1\mathrm{e}{-4}}{1\mathrm{e}{-1}}$ \\
+        Weight decay & $\interval{0.0}{0.2}$ \\
+        $\eta_{min}$ & $\interval{1\mathrm{e}{-5}}{0.99}$ \\
+        Model dropout & $\interval{0.0}{0.6}$ \\
+        FC dropout & $\interval{0.0}{0.6}$ \\
+        Original $f$ number & $\{True, False\}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{The search space of the \textit{ptbxl-xResnet1d} experiment.}
+    \label{tab:ptbxl_xresnet}
+\end{table}
+
+% ChestX-ray14
+\subsubsection{7.\ xray-densenet}
+In the last experiment, we optimize hyperparameters of a DenseNet model trained on the ChestX-ray14 dataset. Diagnosis of chest X-ray scans is a challenging task, which is why we chose the more recent DenseNet architecture instead of a ResNet or simpler architecture. In this experiment, we optimize only six hyperparameters (see Table~\ref{tab:xray_densenet}) --- the learning rate, $\eta_{min}$, weight decay, rotation, resize crop factor, and translation factor. We use the DenseNet parametrized with default hyperparameters provided in the implementation.
+
+% xRay_DenseNet
+\begin{table}
+    \centering
+    \begin{tabular}{lc}
+        \toprule
+        Hyperparameter & Values \\
+        \midrule
+        Learning rate & $\interval{1\mathrm{e}{-5}}{1\mathrm{e}{-1}}$ \\
+        $\eta_{min}$ & $\interval{1\mathrm{e}{-5}}{0.99}$ \\
+        Weight decay & $\interval{1\mathrm{e}{-6}}{1\mathrm{e}{-1}}$ \\
+        Rotation & $\{0, \ldots , 30\}$ \\
+        Translation factor & $\interval{0.0}{0.3}$ \\
+        Resize crop factor & $\interval{0.7}{1.0}$ \\
+        \bottomrule
+    \end{tabular}
+    \caption{The search space of the \textit{xray-densenet} experiment.}
+    \label{tab:xray_densenet}
+\end{table}
+
+
+\section{Algorithms}
+% Algorithms tabular
+First, we start with a larger set of algorithms to evaluate on cheap tabular benchmarks. Then, we select a subset of the algorithms to evaluate on expensive real-world problems. We chose the following algorithms for the comparison:
 \begin{itemize}
-\item \textbf{Random search:} Random search serves the purpose of a baseline.
-\item \textbf{Hyperband:} To see how much difference the synchronous early-stopping makes.
-\item \textbf{ASHA:} Simple asynchronous early-stopping baseline.
-\item \textbf{BOHB:} Popular model-based Hyperband algorithm.
-\item \textbf{DEHB:} So that we have other models than Bayesian optimization.
-\item \textbf{MOBSTER:} Asynchronous model-based baseline.
-\item \textbf{Hyper-Tune:} Should be an improvement over the MOBSTER.
-\item \textbf{DyHPO:} The most recent algorithm, even though we do not use the original deep kernel version, but normal Gaussian process is used.
+\item \textbf{Random search:} Random search (RS) is the baseline algorithm. Note that we use random search with a modification. The first configuration is not random. Instead, the mid-point rule is used for all values. The mid-point rule chooses a value in the middle of the range, which often works quite well. We use it because, in a real-world hyperparameter optimization problem, this is a simple way to have a chance to get a good solution early, which is important in a low-budget scenario. In general, this should make the random search a stronger baseline.
+\item \textbf{Hyperband:} Hyperband is included in the comparison because both BOHB and DEHB use the same scheduling logic. This allows us to directly compare them to Hyperband to assess the effect of the model.
+\item \textbf{ASHA:} We include ASHA to see the effect of the asynchronous early stopping without a model.
+\item \textbf{BOHB:} Popular model-based Hyperband algorithm that uses KDE-based model. It often served as the algorithm to beat when publishing a new algorithm.
+\item \textbf{DEHB:} DEHB is interesting because it is the only model-based algorithm from our literature survey that does not use a Bayesian optimization surrogate.
+\item \textbf{MOBSTER:} MOBSTER is one of the recent model-based algorithms that use asynchronous successive halving.
+\item \textbf{Hyper-Tune:} Hyper-Tune is similar to MOBSTER, but it should contain a couple of additional improvements.
+\item \textbf{DyHPO:} The most recent algorithm is the DyHPO.\@ We do not use the original deep kernel version, a standard Gaussian process is used as a surrogate, because there was a problem with the original implementation.
 \end{itemize}
+
+% Algorithms real-world
+For the real-world experiments, we reduced the set of algorithms to random search, ASHA, BOHB, Hyper-Tune and DyHPO.\@ We chose to use the stopping variant of ASHA to provide an alternative to random search that does not require checkpointing. MOBSTER and DEHB were excluded based on the results of the tabular experiments.
+
+
+\section{Experimental setup and procedures}
+% Evaluations, repetions, optimized functions
+We set the total optimization budget to 20 full function evaluations, where a single full evaluation is defined as the maximal number of epochs a single network can be trained for. For example, all models in LCBench are trained for 50 epochs, so the total budget is 1000 epochs for all LCBench benchmarks. We use 30 repetitions with different seed values for the tabular experiments and 10 for the real-world experiments. These values were chosen as a trade-off balancing the precision and reliability of the results and the runtime. Training loss and validation loss are always tracked, as well as the wall-clock time and the time spent by function evaluation per epoch. We will compute the overhead time of the optimization algorithms in the results. The overhead time is obtained by subtracting the function evaluation duration from the elapsed time of each iteration. The hyperparameter optimization algorithms optimize either the validation loss, or a metric computed on the validation set (e.g.\ accuracy, or area under the ROC curve). The optimized function in the hyperparameter tuning is used for the evaluation, too.
+
+% Cumulative metric and regret
+We are interested in the best solution found at any given iteration. Therefore, we evaluate a single experiment using the values of the optimized function transformed by the cumulative minimum or cumulative maximum function, depending on the direction of the optimization. More precisely, if the task is to maximize the function and given a series of function values from a trial \( \{x_i\} \) where \( i = 1, 2, \ldots, n \) denotes the epoch, the cumulative maximum of a series is defined as follows:
+\[
+\text{cummax}(x_1, x_2, \ldots, x_n) = \{y_i\} \quad \text{where} \quad y_i = \max(x_1, x_2, \ldots, x_i),
+\]
+
+\noindent
+and similarly for minimization, except that $y_i = \min(x_1, x_2, \ldots, x_i)$.
+
+For the evaluation of a set of experiments at once, we use cumulative \textit{regret}. We calculate regret from the metric by converting it to minimization and normalizing the values into the range from 0 to 1. The normalization is done for each experiment independently, but across all runs of all algorithms, so the value 0 is assigned to the best solution found by any algorithm. We use regret instead of the original metric in this case because metrics differ across datasets and benchmarks. Therefore, the results of multiple experiments would not be directly comparable because they could have different scales and directions of optimization. We use different methods for analyzing the experiments depending on their type: one method is used for tabular experiments, while a different method is applied to real-world experiments. This is because there are too many experiments in tabular benchmarks to analyze separately and not enough real-world experiments for a reliable aggregated analysis.
+
+% Statistical tests - tabular
+ First, we will describe the method used for the tabular experiments. For each experiment and algorithm, we compute the mean regret over all repetitions, because the statistical comparison method assumes a single reliable value for each experiment and algorithm. In accordance with the best practices for statistical comparison of algorithms across many datasets by Demšar~\cite{demvsar2006statistical}, we use the Friedman test to test the null hypothesis that all algorithms are equivalent. If the Friedman test rejects the null hypothesis, we follow up with the Wilcoxon signed-rank post-hoc test corrected with the Holm method to determine which algorithms perform differently. These tests are recommended because of several properties. They are non-parametric and have almost no assumptions on the data distribution. Since we cannot guarantee normality and homogeneity of variance of the results, it is safer not to use parametric tests like ANOVA.\@ The Wilcoxon test ranks the data internally, so the magnitude of values matters, but only to a limited extent, which is also desired. For all statistical tests, we use the significance level $\alpha=0.05$.
+
+% Statistical tests - real-world
+For real-world experiments, we use a non-parametric test for similar reasons as above. We have also considered parametric Welch's ANOVA with Tukey's HSD test, but Tukey's HSD test assumes equal within-subgroup variance across the subgroups, which does not hold for our data. Therefore, we chose the non-parametric Kruskal-Wallis test followed by Dunn's test without this assumption. The null hypothesis of the Kruskal-Wallis test states that the difference between the mean ranks of all groups is zero. That is, all groups come from the same distribution. If the null hypothesis is rejected, we perform Dunn's test corrected with the Holm method for pairwise comparisons.
+
 
 
 % Library and metacentrum
-We use the Syne-tune~\cite{salinas2022syne} library to perform the experiments. Computational resources were provided by the e-INFRA CZ project (ID:90254),
-supported by the Ministry of Education, Youth and Sports of the Czech Republic.
+We used the Syne-tune~\cite{salinas2022syne} Python library to perform the experiments. The experiments were run in a Singularity container. We used the PyTorch NGC Container release 23.11.\@ The experiments took over 340 days of CPU time to compute; larger models were trained on a GPU.\@ Because the experiments were run on a heterogeneous computational grid, we cannot provide further details on the hardware.
 
-\subsection{Results}
-First, we show the aggregated results in Figure~\ref{ci:tabular}, which shows the average ranks of the algorithms across the 12 datasets from 3 tabulated benchmarks. The connecting bars signify that there is not a statistically significant difference between the algorithms. \xxx{With the Holm p-value correction there are almost no significant differences. LCBench has more datasets, but then the results would be biased towards the LCBench tasks and the tasks are easier.}
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.60]{./img/tabular_exp/cd_diagram.pdf}
-    \caption{Critical difference diagram from tabular benchmarks at the maximal budget. Average ranks are shown on the x-axis.}
-    \label{ci:tabular}
-\end{figure}
-
-Next, we illustrate the results of one benchmark in Figure~\ref{fig:parkinsons}. We provide the complete results in Appendix~\ref{ch:tabular}. We chose the FCNet Parkinsons dataset because it allows us to show several general traits and performance of the algorithms. It is often the case in our experiments that random search is clearly behind all other algorithms, but it is catching up as the budget increases. We can also notice the fixed schedule of the Hyperband. It takes nearly 10 full evaluations for the Hyperband to finish the first iteration (\xxx{or bracket?}) and to evaluate at least one configuration fully. We can also notice that in the first iteration, the model-less Hyperband performs similarly to the model-based extensions. The DEHB did not perform well in our experiments, it was often outperformed by model-less approaches. The performance of the most advanced methods was comparable. We cannot conclusively say that one is better than the other, as it often depends on the specific problem.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.58]{img/tabular_exp/fcnet-parkinsons_plot.pdf}
-    \caption{The averaged and normalized cumulative performance metric over 30 runs on the FCNet Parkinsons benchmark. On the right, we show the same results but zoomed in.}
-    \label{fig:parkinsons}
-\end{figure}
-
-
-The key focus of this thesis is efficiency. A good way to measure efficiency is to compare the algorithms to Random Search and measure how much faster can they find a solution as good as the Random Search has found after spending the whole budget. We call it the speedup factor and present the results in Table~\ref{tab:speedup}. The reported speedup factor is averaged over all benchmarks and repetitions. We assume a speedup is greater than one, which was broken for one dataset, where the Random Search showed the best performance with a small margin. Because we do not have the data beyond the maximal budget, we have set the speedup factor to 1 in such cases.
-
-\subfile{./tables/tab_results.tex}
-
-
-In order to estimate the reliability and consistency of the methods, we provide the heatmap of variances in Figure~\ref{fig:heatmap}. \xxx{But it is hard to interpret the results. Especially where the Random Search is doing okay.}
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.6]{img/tabular_exp/variance_heatmap.pdf}
-    \caption{The heatmap of variances of the best performance across the 30 repetitions. The variances are normalized for each benchmark.}
-    \label{fig:heatmap}
-\end{figure}
-
-
-\section{Real benchmarks}
-
-
-\subsection{Evaluation}
 
 % What resource are we using
-First, we need to specify how to measure the used resources and limit the total budget. We can measure either the wall-clock time, or the number of epochs. Measuring function evaluations does not make sense because of multi-fidelity evaluations --- each evaluation could be at a different budget. The wall-clock time is the quantity that matters in real-world applications, but the number of epochs is easier to work with, especially when the experiments are run at a heterogeneous computer cluster. It comes at the cost of neglecting the overhead of the hyperparameter optimization algorithms and gives a small advantage to the more computationally heavy algorithms. On the other hand, it allows for a direct comparison of sample efficiency and the overhead of a hyperparameter optimization algorithm is negligible in most scenarios encountered when tuning hyperparameters of deep neural networks, as we will show.
-
-% Single dataset
-We chose to evaluate the performance at 20 full function evaluations and 10 full evaluations. We use the Kruskal test to determine whether there is any difference at all, and then we use the Mann-Whitney rank sum test to determine pairwise differences.
-
-
-\subsection{Datasets and models}
-We will run the tests on the chosen tabular benchmarks first. For real-world examples, we can compare the algorithms on image data (CIFAR10, SVHN) and with a simple CNN model, or xResNet model.
-
-We also tested the tuning algorithms on a medical dataset PTB-XL. PTB-XL is a collection of 21837 clinical 12-lead ECGs of 10 second length annotated by up to two cardiologists with ECG statements. In the multilabel classification task, the goal is to assign 1 or more of the 5 diagnostic superclasses. We can perform an experiment using a LSTM RNN, 1d-CNN, or 1d xResNet architecture.
-
-
-\subsection{Experimental Setup}
-
-
-% I could split this chapter into two.
-
-
-\subsection{CIFAR10 - demo}
-
-Probably the most widely used image classification dataset is the CIFAR-10. We use it to evaluate the performance of Random Search, DEHB, Optuna and DyHPO hyperparameter optimization algorithms \xxx{(not the final set of algorithms)}. The optimization was rerun 5 times for each algorithm with different seed \xxx{but this seems to be too little, the means are not significantly different}. The optimization problem consisted of six hyperparameters, three float and three integer. We used AdamW optimizer. Learning rate and the final value of cosine decay $\eta_{min}$ were optimized. The neural network architecture consists of sequential convolutional layers with batch normalization. We optimize the number of convolutional layers and the number of filters. Then the fully connected layer follows and we optimize its size. The hyperparameters and their domains are summarized in the Table~\ref{tc10}.
-
-\begin{table}[H]
-    \centering
-    \begin{tabular}{cc}
-        \textbf{Hyperparameter} & \textbf{Values} \\ \midrule
-        Learning rate & $\{1\mathrm{e}{-4}, 1\mathrm{e}{-1}\}$ \\
-        $\eta_{min}$ & $\{1\mathrm{e}{-5}, 0.99\}$ \\
-        Dropout & $\{0.0, 1.0\}$ \\
-        FC neurons & $\{8, 128\}$ \\
-        Channels multiplier & $\{1, 8\}$ \\
-        Conv layers & $\{1, 4\}$ \\
-    \end{tabular}
-    \caption{CIFAR-10 HPO optimization search space.}
-    \label{tc10}
-\end{table}
-
-The network is trained for up to 70 epochs. The budget for the hyperparameter optimization is 17 full evaluations, which is equal to 1190 epochs. We compare the algorithms in classification accuracy on the validation set. We use the trial number on the x-axis, which neglects the cost of the hyperparameter optimization algorithm.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.64]{./img/cifar_exp_plot.pdf}
-    \caption{CIFAR-10 comparison of the best cumulative accuracy, 17 full evaluations (1190 epochs)}
-    %\label{}
-\end{figure}
-
-The following plots are evaluated after 350 training epochs \xxx{because that is where the difference is the largest; so that we can test if the results will be statistically significant, or if we need more repetitions}.
-
-\begin{figure}[H]
-    \centering
-    \includegraphics[scale=0.74]{./img/cifar_exp_boxplot.pdf}
-    \caption{CIFAR-10 boxplot after 350 epochs.}
-    %\label{}
-\end{figure}
-
-%\xxx{I wanted to use critical difference diagrams for the visualization of performance and statistical analysis because I think they are intuitive and easily readable, but I'm not sure if I can do it even for unpaired experiements. CD diagrams rely on computing the rank of the methods --- comparing the results of different runs to each other.} We used the Mann-Whitney rank sum test for the post-hoc analysis of the results with the significance level $\alpha=0.05$ adjusted with the Holm's method.
-
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[scale=0.74]{./img/cifar_exp_cd_ranks.pdf}
-%     \caption{CIFAR-10 critical difference diagram}
-%     %\label{}
-% \end{figure}
-\subsection{SVHN}
-
-
-\section{Discussion}
+%First, we need to specify how to measure the used resources and limit the total budget. We can measure either the wall-clock time, or the number of epochs. Measuring function evaluations does not make sense because of multi-fidelity evaluations --- each evaluation could be at a different budget. The wall-clock time is the quantity that matters in real-world applications, but the number of epochs is easier to work with, especially when the experiments are run at a heterogeneous computer cluster. It comes at the cost of neglecting the overhead of the hyperparameter optimization algorithms and gives a small advantage to the more computationally heavy algorithms. On the other hand, it allows for a direct comparison of sample efficiency and the overhead of a hyperparameter optimization algorithm is negligible in most scenarios encountered when tuning hyperparameters of deep neural networks, as we will show.

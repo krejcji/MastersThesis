@@ -1,27 +1,60 @@
 
 \chapwithtoc{Introduction}
+% Zadani
+% Mnoho metod strojového učení je citlivých na nastavení hyper-parametrů. V posledních letech se rychle rozvíjí metody pro ladění tohoto nastavení. Většina existujících metod je ale velmi výpočetně náročná, což komplikuje jejich reálné nasazení. Zároveň chybí podrobnější porovnání výkonnosti jednotlivých metod. Cílem práce je porovnat existující metody pro ladění hyper-parametrů a navrhnout nové metody s ohledem nejen na kvalitu nalezených nastavení, ale také na dobu běhu.
+
+% Student nastuduje dostupné metody a knihovny pro ladění hyper-parametrů metod strojového učení. Vybrané metody mezi sebou porovná a na základě získaných informací implementuje metody nové, které budou uvažovat jak rychlost ladění tak kvalitu nalezených řešení.
+
+ %Establish the importance of the field
+ %   1 Establish the importance of this research topic
+ %         Hyperparameter optimization is important because
+%
+ %   2 Provide general background information
+ %       The two most common approaches to hyperparameter tuning are by hand, or using a random search.
+ %   3 Provide more detailed background information
+ %   4 Describe the general problem area or the current research focus of the field
+ %Previous or current research
+ %   5 Provide a transition between the general problem area and the literature review
+ %   6 Provide a brief overview of key research projects in this area
+ %Locate a gap in research
+ %   7 Describe a gap in the research
+ %Describe the present paper
+ %   8 Describe the paper itself
+ %   9 Give details about the methodology reported in the paper
+ %   10 Announce the findings
 
 % Introduction should answer the following questions, ideally in this order
 
+%In this thesis, we address the problem of hyperparameter tuning of deep neural networks. The most common way to tune hyperparameters still to this day is by hand, by trial and error, relying on previous experience and various rules of thumb. Tuning hyperparameters this way is a time-consuming task and requires a great deal of expertise to do efficiently and well. Methods like random search are also employed, but just as the computing power grows each year, the complexity of machine learning models grows even faster. Consequently, the need for more efficient methods is of growing interest. Moreover, an algorithm can do the task more thoroughly while saving human effort.
+
+
 % What is the nature of the problem the thesis is addressing?
-In this thesis, we are addressing the problem of hyperparameter tuning of deep neural networks. The most common way to tune hyperparameters still to this day is by hand, by trial and error, relying on previous experience and various rules of thumb. It is very time-consuming for people and requires a great deal of expertise to do efficiently and well.
-With the steady increase in computing power, it is preferable to offload this task to computers. The right algorithm can do the task more thoroughly and without much human effort.
+Hyperparameter optimization is an important step in the machine learning workflow that can have a striking effect on model generalization and performance. Historically, the most prevalent approaches to hyperparameter optimization were tuning the hyperparameters manually, using a random search, or a grid search. A breakthrough in the field was the adaptation of Bayesian optimization~\cite{mockus1974bayesian,snoek2012practical}, which uses probabilistic models to predict the performance of hyperparameter configurations to make an informed decision about which configuration to evaluate next. Nevertheless, as the complexity of machine learning models has increased rapidly in recent years, not even Bayesian optimization alone might be feasible for many tasks. The next step seems to be the multi-fidelity hyperparameter tuning, which makes use of cheap but unreliable evaluations, often combined with Bayesian optimization.
 
-Even though this is an extensively studied problem, there still is no consensus on which method performs best. In this thesis, we want to expand on the knowledge of these algorithms and conduct experiments in the healthcare domain.
+% The therefore does not fit in very well
 
-The main issue is that the function we optimize is expensive to evaluate and the range of possible input values is vast. One function evaluation, or training the network, can take hours or days. That is why the classical methods for hyperparameter optimization in machine learning such as grid search are not applicable to more complex deep learning architectures. Therefore, more sophisticated methods and algorithms were developed and are still being researched. The most important metric in this field is the efficiency of the search.
+%Even though this is an extensively studied problem, there is still no consensus on which method performs best. In this thesis, we expand on the knowledge of these algorithms and conduct experiments on image data; and also in the healthcare domain.
+
+%The main issue is that the function we optimize is expensive to evaluate and the range of possible input values is vast. One function evaluation, or training the network, can take hours or days. That is why the classical methods for hyperparameter optimization in machine learning such as grid search are not applicable to more complex deep learning architectures. Therefore, more sophisticated methods and algorithms were developed and are still being researched. The most important metric in this field is the efficiency of the search.
 
 % What is the common approach for solving that problem now?
-Hyperparameter optimization has roots in black-box optimization techniques. The machine learning models act as a black-box system to an extent. In deep learning, there is some potential to exploit the knowledge of the system, but only to a small degree. Many tools and optimization frameworks exist for hyperparameter tuning. Most of them are even open source, such as Optuna~\cite{akiba2019optuna} or SMAC3~\cite{smac3}. These tuning tools usually use Bayesian optimization techniques internally. Bayesian optimization is well suited for global optimization of black-box, expensive-to-evaluate functions.
+% Hyperparameter optimization has roots in black-box optimization techniques. The machine learning models act as a black-box system to an extent. In deep learning, there is some potential to exploit the knowledge of the system, but only to a small degree. Many tools and optimization frameworks exist for hyperparameter tuning. Most of them are even open source, such as Optuna~\cite{akiba2019optuna} or SMAC3~\cite{smac3}. These tuning tools usually use Bayesian optimization techniques internally. Bayesian optimization is well suited for global optimization of black-box, expensive-to-evaluate functions.
 
 
 % How this thesis approaches the problem?
-In this thesis, we focus on low-budget search. We research the literature on multi-fidelity hyperparameter tuning and experiment with how to best spend a limited budget. We compare the HPO methods on some machine learning tasks in the domain of health care and others.
-
-
 % What are the results? Did something improve?
+We conduct a literature survey on state-of-the-art hyperparameter optimization methods. Additionally, we examine the underlying principles of these methods, explaining the most important ideas and their practical implications. Our research found that limited performance comparisons of hyperparameter optimization algorithms were available. Therefore, instead of developing a new algorithm, we carried out experiments to compare the most promising algorithms across various tasks. These tasks include tabular benchmarks as well as real-world deep-learning problems. In addition to the usual image datasets, we chose two datasets from the healthcare domain, too. The results of the experiments confirm that multi-fidelity techniques are superior to random search, but no single algorithm consistently outperforms others across all tasks.
+
+% UPDATE
+% We have found that the research on the performance of the hyperparameter optimization algorithms is limited. Only when a new algorithm is published does the author a comparison. However, there is not a standardized and diverse set of experiments.   we perform a set of experiments to compare the most promising algorithms on a diverse range of tasks. These tasks include tabular benchmarks as well as real-world deep-learning problems. In addition to the usual image datasets, we chose two datasets from the healthcare domain, too. The results of the experiments confirm that multi-fidelity techniques are superior to random search, but no single algorithm consistently outperforms others across all tasks.
+
+
+% that will do well on any problem?
+% add more information about the multi-fidelity
+% add more about the experiments, include healthcare domain
 
 % What can the reader expect in the individual chapters of the thesis?
+The thesis is divided into four chapters. In Chapter~1 we introduce key concepts and definitions that will be used throughout the thesis. These include a brief introduction to machine learning, a formal definition of the hyperparameter optimization problem, and hyperparameter optimization techniques including Bayesian optimization. In Chapter~2 we explore multi-fidelity optimization techniques in depth. Chapter~3 discusses the methodology, which includes the design of the experiments and how the collected data from the experiments are processed. In Chapter~4 we present the results and interpret them in the discussion.
 
 
 % Expected length of the introduction is between 1--4 pages. Longer introductions may require sub-sectioning with appropriate headings --- use \texttt{\textbackslash{}section*} to avoid numbering (with section names like `Motivation' and `Related work'), but try to avoid lengthy discussion of anything specific. Any ``real science'' (definitions, theorems, methods, data) should go into other chapters.

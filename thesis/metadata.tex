@@ -37,7 +37,7 @@
 
 % (Note: \xxx is a "ToDo label" which makes the unfilled visible. Remove it.)
 \def\ThesisTitle{Efficient hyperparameter optimization}
-\def\ThesisAuthor{Jiří Krejčí}
+\def\ThesisAuthor{Bc.~Jiří Krejčí}
 \def\YearSubmitted{2024}
 
 % department assigned to the thesis
@@ -45,30 +45,31 @@
 % Is it a department (katedra), or an institute (ústav)?
 \def\DeptType{Department}
 
-\def\Supervisor{Mgr. Martin Pilát, Ph.D.}
+\def\Supervisor{doc.~Mgr.~Martin Pilát,~Ph.D.}
 \def\SupervisorsDepartment{Department of Theoretical Computer Science and Mathematical Logic}
 
 % Study programme and specialization
-\def\StudyProgramme{Computer Science - Artificial Intelligence}
-\def\StudyBranch{IUIP}
+\def\StudyProgramme{Computer Science}
+\def\StudyBranch{Artificial Intelligence (IUIP)}
 
 \def\Dedication{%
-Dedication. \xxx{It is nice to say thanks to supervisors, friends, family, book authors and food providers.}
+I am grateful for the support and patience of my family, my partner, and my friends on this arduous journey. I also appreciate all the support and great advice of my supervisor Martin Pilát. Thank you.
+
+A special mention goes to the e-INFRA CZ project (ID:90254), supported by the Ministry of Education, Youth and Sports of the Czech Republic, for providing the computational resources.
 }
 
 \def\AbstractEN{%
-\xxx{Abstracts are an abstract form of art. Use the most precise, shortest sentences that state what problem the thesis addresses, how it is approached, pinpoint the exact result achieved, and describe the applications and significance of the results. Highlight anything novel that was discovered or improved by the thesis. Maximum length is 200 words, but try to fit into 120. Abstracts are often used for deciding if a reviewer will be suitable for the thesis; a well-written abstract thus increases the probability of getting a reviewer who will like the thesis.}
-% ABSTRACT IS NOT A COPY OF YOUR THESIS ASSIGNMENT!
+Hyperparameter optimization significantly impacts model performance and substantial effort went into the development of robust and efficient algorithms for this task. Our research found that several new algorithms utilizing partial evaluations have been published recently. However, it is not clear from the literature how the algorithms perform in various scenarios. In this thesis, we compared the leading algorithms through experiments on diverse tasks, including tabular benchmarks and real-world deep-learning problems, with a special focus on healthcare datasets. The results show that the recent multi-fidelity techniques outperform random search. Nevertheless, no single algorithm consistently excelled across all problems, highlighting the need for ongoing comparison studies in hyperparameter optimization.
 }
 
 \def\AbstractCS{%
-\xxx{You will need to submit both Czech and English abstract to the SIS, no matter what language you use in the thesis. If writing in English, translate the contents of \texttt{\textbackslash{}AbstractEN} into this field. In case you do not speak czech, your supervisor should be able to help you with the translation.}
+Ladění hyperparametrů má značný vliv na vlastnosti výsledného modelu a vývoji robustních a efektivních algoritmů pro tuto úlohu bylo věnováno velké úsilí. Nedávno bylo vyvinuto několik nových algoritmů využívajících částečných vyhodnocení optimalizované funkce. Z literatury nicméně není zřejmé, jak si tyto algoritmy vedou na rozmanitých problémech. V této diplomové práci jsme experimentálně srovnali aktuální algoritmy pro ladění hyperparametrů v mnoha úlohách. Tyto úlohy se skládaly z tabulárních benchmarků a reálných úloh hlubokého učení, včetně datových sad z oblasti zdravotnictví. Výsledky ukazují, že nedávné multi-fidelity techniky dosahují lepších výsledků než náhodné prohledávání. Přesto však žádný algoritmus nepodával konzistentně nejlepší výkon ve všech problémech, což zdůrazňuje potřebu průběžných srovnávacích studií v oblasti optimalizace hyperparametrů.
 }
 
 % 3 to 5 keywords (recommended), each enclosed in curly braces.
 % Keywords are useful for indexing and searching for the theses by topic.
 \def\Keywords{%
-{deep learning} {hyperparameter optimization (HPO)} {Bayesian optimization (BO)} {multi-fidelity}
+{deep learning} {hyperparameter optimization} {Bayesian optimization} {multi-fidelity}
 }
 
 % If your abstracts are long and do not fit in the infopage, you can make the
@@ -78,16 +79,3 @@ Dedication. \xxx{It is nice to say thanks to supervisors, friends, family, book 
 \def\InfoPageFont{}
 %\def\InfoPageFont{\small}  %uncomment to decrease font size
 
-\ifEN\relax\else
-% If you are writing a czech thesis, you additionally need to fill in the
-% english translation of the metadata here!
-\def\ThesisTitleEN{\xxx{Thesis title in English}}
-\def\DepartmentEN{\xxx{Name of the department in English}}
-\def\DeptTypeEN{\xxx{Department}}
-\def\SupervisorsDepartmentEN{\xxx{Superdepartment}}
-\def\StudyProgrammeEN{\xxx{study programme}}
-\def\StudyBranchEN{\xxx{study branch}}
-\def\KeywordsEN{%
-\xxx{{key} {words}}
-}
-\fi

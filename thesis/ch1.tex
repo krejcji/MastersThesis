@@ -3,9 +3,9 @@
 
 \label{chap:refs}
 
-\section{Machine learning fundamentals}
-
-Our goal is to optimize hyperparameters, but before we introduce the main topic, we need to specify the context --- machine learning. We include this chapter to introduce the notation and to give the readers some intuition for the machine learning algorithms and models underlying hyperparameter optimization in this thesis. Readers familiar with machine learning, and with deep learning in particular, can skip this section and start directly with hyperparameter optimization in Section~\ref{sec:hpo}. First, we will introduce the task of supervised machine learning, how the dataset is commonly split, and the function that is optimized in order to train the model. Then we will briefly introduce deep learning and a couple of frequently used architectures. Finally, we will end with an overview of the optimization algorithm behind neural networks.
+\section{Machine learning basics}
+% TODO: Formulation could be better.
+Our goal is to optimize hyperparameters, but before we introduce the main topic, we need to specify the context --- machine learning. We include this chapter to introduce the notation and to give readers some intuition for the machine learning algorithms and models underlying hyperparameter optimization in this thesis. Readers familiar with machine learning, and with deep learning in particular, can skip this section and start directly with hyperparameter optimization in Section~\ref{sec:hpo}. The material in this section is covered by the~\citetitle{Goodfellow-et-al-2016} book~\cite{Goodfellow-et-al-2016}. First, we will introduce the task of supervised machine learning, how the dataset is commonly split, and the function that is optimized in order to train the model. Then we will briefly introduce deep learning and a couple of frequently used architectures. Finally, we will end with an overview of the optimization algorithm behind neural networks.
 
 % In general, machine learning is the ability of an AI system to acquire its own knowledge by extracting patterns from raw data. In the last decade, one particular class of machine learning algorithms took over --- deep learning.
 
@@ -18,7 +18,7 @@ Our goal is to optimize hyperparameters, but before we introduce the main topic,
 
 \subsection{Supervised machine learning}
 % Dataset, labeled examples, classification vs regression
-Let $\mathcal{D}$ be a labeled dataset, consisting of examples generated independently from a data-generating distribution. Each example $(x^{(i)}, \  y^{(i)})$ consist of a feature vector $x^{(i)}\in \mathcal{X}$ and its label $y^{(i)}\in \mathcal{Y}$. Depending on the labels, we distinguish classification and regression. In classification, the labels are finite-valued, while in regression the labels are real numbers. The goal of supervised learning is to train a model using the examples from the dataset $\mathcal{D}$ so that it generalizes well to data from the data-generating distribution. Simply put, we want the model to correctly predict the labels on unseen data. We assume the unseen data come from the same data-generating distribution so that the model can use the learned patterns for the task.  % Generalization error
+Let $\mathcal{D}$ be a labeled dataset, consisting of examples generated independently from a data-generating distribution. Each example $(x^{(i)}, \  y^{(i)})$ consist of a feature vector $x^{(i)}\in \mathcal{X}$ and its label $y^{(i)}\in \mathcal{Y}$. Depending on the labels, we distinguish classification and regression. In classification, the labels are from a finite set, while in regression the labels are real numbers. The goal of supervised learning is to train a model using the examples from the dataset $\mathcal{D}$ so that it generalizes well to data from the data-generating distribution. Simply put, we want the model to correctly predict the labels on unseen data. We assume the unseen data come from the same data-generating distribution so that the model can use the learned patterns for the task.  % Generalization error
 
 % Generalization, train, val, test split
 Since the goal is for the model to generalize well, we need to estimate the generalization error in the training and model selection process on unseen data. It is a best practice to split the dataset into $\mathcal{D}_{train}, \  \mathcal{D}_{val}, \mathcal{D}_{test}$. We use $\mathcal{D}_{train}$ for the training of the model, $\mathcal{D}_{val}$ for the estimate of the generalization error during development, and $\mathcal{D}_{test}$ for the final evaluation. A separate test set is needed for the final evaluation because the validation set has already been used to choose the best model, which means there is a bias in the estimate. As we will see, using a hyperparameter optimization tool introduces yet another optimization layer, meaning we should do a similar split even for the outer optimization of hyperparameters.
@@ -36,7 +36,7 @@ The loss functions depend mostly on the task, not on the specific machine learni
 % We focus on hyperparameter optimization of neural networks since neural networks are widely used today and have many hyperparameters.
 \subsection{Deep learning}
 % Deep learning, perceptrons
-Deep learning is a subset of machine learning methods based on neural networks. The ``deep'' in deep learning refers to the use of multiple layers in the network. A neural network describes a computation that models complex patterns and representations in data. The basic unit is called a node and the nodes are arranged in an acyclic graph. Nodes generally represent some operation, while edges can be annotated with parameters for the operation. We call the parameters or neural network \textit{weights}. A simple example of a neural network is the perceptron (see Figure~\ref{fig:perceptron}). The output value is computed by summing the values of inputs multiplied by the corresponding weights, adding a bias of the node, and passing the weighted sum through an activation function $a$:
+Deep learning is a subset of machine learning methods based on neural networks. The ``deep'' in deep learning refers to the use of multiple layers in the network. A neural network describes a computation that models complex patterns and representations in data. The basic unit is called a node and the nodes are arranged in an acyclic graph. Nodes generally represent some operation, while edges can be annotated with parameters for the operation. We call the parameters of a~neural network \textit{weights}. A simple example of a neural network is the perceptron (see Figure~\ref{fig:perceptron}). The output value is computed by summing the values of inputs multiplied by the corresponding weights, adding a bias of the node, and passing the weighted sum through an activation function $a$:
 \begin{equation}
 y = a(\sum_j x_jw_j + b).
 \label{eq:node}
@@ -103,7 +103,7 @@ For image data or any other data with some structure, a \textit{convolutional ne
 \begin{figure}
     \centering
     \includegraphics[scale=0.25]{img/convolution.png}
-    \caption{An example of a 2-D convolution. (Source: Figure 9.1 of ``Deep Learning'' book~\cite{Goodfellow-et-al-2016})}
+    \caption{An example of a 2-D convolution. (Source: Figure 9.1 from the \citetitle{Goodfellow-et-al-2016} book~\cite{Goodfellow-et-al-2016})}
     \label{fig:conv}
 \end{figure}
 
@@ -176,10 +176,11 @@ One way to reduce overfitting is to use a \textit{weight decay}, which multiplie
 
 
 \section{Hyperparameter optimization} \label{sec:hpo}
-% Define hyperparameters, their impact on model performance, why optimization is important
+% Introduction - parameter vs hyperparameter, examples, definitions source
+Hyperparameter optimization, or hyperparameter tuning, is the process of selecting the best set of hyperparameters for a machine learning problem. The key distinction between a model parameter and a hyperparameter is that a hyperparameter has to be specified before the training process, while parameters are inferred automatically during the training process. Nevertheless, hyperparameters have a direct influence on the model, as well as the training process. We have already seen hyperparameters related to the training of neural networks, overfitting, underfitting and regularization in the previous section. These hyperparameters alone can make the difference between a model that easily generalizes to unseen examples, and a model that does not predict anything useful. In the following text, we define the hyperparameter optimization problem formally. For that, we use definitions and notation from the paper by \citet{eggensperger2013towards}.
 
-% TODO: Definition is inspired by Towards an Empirical Foundation for Assessing... Eggensperger
-Let $A$ be a machine learning algorithm with hyperparameters $\lambda_1, \dots , \lambda_n$ with domains $\Lambda_1,\dots , \Lambda_n$. Let $ \mathbf{\Lambda } = \Lambda_1 \times \cdots \times \Lambda_n$ denote its hyperparameter space. Hyperparameters can be continuous, integer-valued, or categorical. Also, we can have conditional hyperparameters. We say that hyperparameter $\lambda_i$ is \emph{conditional} on another hyperparameter $\lambda_j$, if $\lambda_i$ is only active if hyperparameter $\lambda_j$ takes values from a given set $V_i(j) \subset \Lambda_j$
+% Define hyperparameters, their impact on model performance, why optimization is important
+Let $A$ be a machine learning algorithm with hyperparameters $\lambda_1, \dots , \lambda_n$ with domains $\Lambda_1,\dots , \Lambda_n$. Let $ \mathbf{\Lambda } = \Lambda_1 \times \cdots \times \Lambda_n$ denote its hyperparameter space. Hyperparameters can be continuous, integer-valued, or categorical. There can be conditional hyperparameters, too. We say that hyperparameter $\lambda_i$ is \emph{conditional} on another hyperparameter $\lambda_j$, if $\lambda_i$ is only active if hyperparameter $\lambda_j$ takes values from a given set $V_i(j) \subset \Lambda_j$
 
 For each hyperparameter configuration or setting $\lambda \in \mathbf{\Lambda}$, we denote $A_\lambda$ the learning algorithm A using this hyperparameter setting. Let $\mathcal{L}(A_\Lambda, \: \mathcal{D}_{train}, \: \mathcal{D}_{valid})$ denote the validation loss of algorithm $A_\lambda$ on data $\mathcal{D}_{valid}$ when trained on $\mathcal{D}_{train}$.
 
@@ -286,9 +287,9 @@ Probably the simplest acquisition function is the Upper Confidence Bound (UCB). 
 where $\lambda$ is an exploration parameter. The smaller the $\lambda$, the more the UCB exploits regions that are known to yield good solutions and vice versa. The UCB acquisition function is illustrated in Figure~\ref{fig:ucb}.
 
 \subsubsection{Probability of Improvement}
-Let $y^*=\max_{i\in[1..n]} f(x_i)$ be the value of the best evaluated point so far after $n$ iterations and let $x$ be the next point we consider sampling. We define an improvement random variable as
+Let $y^*=\max_{i\in[1..n]} f(x_i)$ be the value of the best point evaluated so far after $n$ iterations and let $x$ be the next point we consider sampling. We define an improvement random variable as
 \[
-    I(x) \coloneq \max(f(x) - y^*),0).
+    I(x) \coloneq \max(f(x) - y^*,0).
 \]
 
 The probability of improvement acquisition function assigns to each candidate $x$ the probability of $I(x) > 0$. We can write
@@ -301,7 +302,7 @@ Since we assume that $f(x)$ is normally distributed, then the PI is calculated f
     PI(x) = 1 - \Phi\left(\frac{y^*-\mu(x)}{\sigma(x)}\right) = \Phi\left(\frac{\mu(x)-y^*}{\sigma(x)}\right).
 \]
 
-The problem with PI is that it does not factor in the magnitude of improvement. In the standard form, PI cares only about being as certain as possible about improving upon the incumbent solution. This often results in PI suggesting points close to the optimum, i.e.\ PI is biased towards exploitation. This problem is alleviated by adding a new parameter $\xi$, which forces PI to consider only points that are by at least $\xi$ better than the incumbent:
+The problem with PI is that it does not factor in the magnitude of improvement. In the standard form, PI cares only about being as certain as possible about improving upon the current best solution. This often results in PI suggesting points close to the optimum, i.e.\ PI is biased towards exploitation. This problem is alleviated by adding a new parameter $\xi$, which forces PI to consider only points that are by at least $\xi$ better than the current best solution:
 \[
     PI(x)=P(I(x)>\xi)
 \]
@@ -311,7 +312,7 @@ Expected improvement (EI)~\cite{jones1998efficient} enhances PI by considering t
 \[
 \frac{1}{\sqrt{2 \pi}\sigma(x)} \text{exp}\left(-\frac{(\mu(x)-y^*-I)^2}{2\sigma^2(x)}\right).
 \]
-\xxx{Is the random variable notation used correctly here for $I(x)$? Is it a problem that we cut off the improvement at 0?}
+% TODO: Is the random variable notation used correctly here for $I(x)$? Is it a problem that we cut off the improvement at 0? Probably Okay
 
 The expected value is calculated by integrating the density function multiplied by the improvement:
 \[ EI(x) = \mathbb{E}[I(x)] = \int_{I=0}^{I=\infty} I\frac{1}{\sqrt{2 \pi}\sigma(x)} exp\left(-\frac{(\mu(x)-y^*-I)^2}{2\sigma^2(x)}\right) dI. \]
@@ -345,7 +346,7 @@ where
 \newpage
 \subsection{Gaussian Process Regression}
 % Why is Gaussian process regression the default choice for Bayesian Optimization
-The standard model in the Bayesian Optimization literature is the GP regression. An intuitive introduction to the topic was published by Jie Wang~\cite{wang2023intuitive}, and we use similar illustrations to present the topic. The definitions and the notation are taken from the textbook by Rasmussen~\cite{rasmussen2006gaussian}. There are many other machine learning algorithms for regression, but Gaussian processes offer a unique mix of properties that make them the natural choice. One of the most important properties of GPs is that they quantify the uncertainty, which allows us to incorporate it into our sampling strategy --- the areas with the most uncertainty should likely be explored more, or similar heuristic strategy. Another advantage is the possibility of incorporating our prior beliefs about the objective function with the kernel function. As a result, Gaussian processes are remarkably efficient when the amount of data is limited. On the other hand, GPs do not scale well with large datasets, because of their $\mathcal{O}(n^3)$ complexity. In practice, GPs limit us to the number of samples in the order of hundreds.
+The standard model in the Bayesian Optimization literature is the Gaussian Process (GP) regression. An intuitive introduction to the topic was published by \citet{wang2023intuitive}. Because the presentation of the topic is clear and concise in Wang's work, we have rewritten and adapted this approach in our own words. The definitions and the notation are taken from the textbook by Rasmussen~\cite{rasmussen2006gaussian}. There are many other machine learning algorithms for regression, but Gaussian processes offer a unique mix of properties that make them the natural choice. One of the most important properties of GPs is that they quantify the uncertainty, which allows us to incorporate it into our sampling strategy --- the areas with the most uncertainty should likely be explored more, or similar heuristic strategy. Another advantage is the possibility of incorporating our prior beliefs about the objective function with the kernel function. As a result, Gaussian processes are remarkably efficient when the amount of data is limited. On the other hand, GPs do not scale well with large datasets, because of their $\mathcal{O}(n^3)$ complexity. In practice, GPs limit us to the number of samples in the order of hundreds.
 
 \subsubsection{Gaussian distribution}
 % Univariate normal distribution
@@ -505,9 +506,9 @@ Gaussian processes are best suited for optimization over continuous domains of l
 
 \subsection{Tree-Structured Parzen Estimator}
 
-Another popular Bayesian optimization method for hyperparameter optimization is the Tree-structured Parzen Estimator (TPE) introduced by Bergstra et al.~\cite{bergstra2011algorithms} As the name suggests, it is an extension of a Parzen estimator to a tree-structured search space. Therefore, a TPE can handle conditional parameters as well. A Parzen estimator, also known as a kernel density estimator (KDE), is a non-parametric method used to estimate the probability density function of a random variable based on a set of observed data points. Instead of assuming the underlying distribution and fitting it to the data, a Parzen estimator uses a kernel function to determine the shape and influence of each data point on the estimated probability density function.
+Another popular Bayesian optimization method for hyperparameter optimization is the Tree-structured Parzen Estimator (TPE) introduced by~\citet{bergstra2011algorithms}. As the name suggests, it is an extension of a Parzen estimator to a tree-structured search space. Therefore, TPE can handle conditional parameters as well, which is one of its advantages over GPs. A Parzen estimator, also known as a kernel density estimator (KDE), is a non-parametric method used to estimate the probability density function of a random variable based on a set of observed data points. Instead of assuming the underlying distribution and fitting it to the data, a Parzen estimator uses a kernel function to determine the shape and influence of each data point on the estimated probability density function. We provide a brief explanation of the inner workings of TPE, primarily based on the work of \citet{watanabe2023tree}.
 
-In a TPE algorithm, two kernel density estimators are used. Keeping the notation from the original paper~\cite{bergstra2011algorithms}, we want to minimize the objective function $f(x)$ and the observations $\mathcal{D}$ are split into the better (lower) group $\mathcal{D}^{(l)}$ and the worse (greater) group $\mathcal{D}^{(g)}$ based on their objective value; for illustration see the top left part of Figure~\ref{fig:tpe}. More precisely, the top-quantile $\gamma$ is computed in each iteration based on the number of observations $N=|\mathcal{D}|$ and $y^{\gamma}$ is the top-$\gamma$-quantile objective value in the set of observations $\mathcal{D}$. Observations with $y\leq y^\gamma$ are assigned into the $\mathcal{D}^{(l)}$, and observations with $y > y^\gamma$ to the $\mathcal{D}^{(g)}$. The subsets are used to model $p(\mathbf{x} \given y, \mathcal{D})$ with the assumption:
+In the TPE algorithm, two kernel density estimators are used. Keeping the notation from the original paper~\cite{bergstra2011algorithms}, we want to minimize the objective function $f(x)$ and the observations $\mathcal{D}$ are split into the better (lower) group $\mathcal{D}^{(l)}$ and the worse (greater) group $\mathcal{D}^{(g)}$ based on their objective value; for illustration see the top left part of Figure~\ref{fig:tpe}. More precisely, the top-quantile $\gamma$ is computed in each iteration based on the number of observations $N=|\mathcal{D}|$ and $y^{\gamma}$ is the top-$\gamma$-quantile objective value in the set of observations $\mathcal{D}$. Observations with $y\leq y^\gamma$ are assigned into the $\mathcal{D}^{(l)}$, and observations with $y > y^\gamma$ to the $\mathcal{D}^{(g)}$. The subsets are used to model $p(\mathbf{x} \given y, \mathcal{D})$ with the assumption:
 \begin{equation} (\mathbf{x} \given y, \mathcal{D})\coloneq  \left\{
   \begin{array}{ll}
         p(\mathbf{x} \given \mathcal{D}^{(l)}) \quad  &(y \leq y^\gamma) \\
@@ -535,6 +536,7 @@ Now we can show how the kernel density estimations from the equation above are c
     \label{eqn:tpe:kdes}
 \end{equation}
 
+\noindent
 where $k$ is a kernel function, the weights $\{ w_n \}_{n=1}^N$ are recomputed every iteration, $b^{(l)},b^{(g)} \in \R_+$ are the bandwidth and $p_0$ is non-informative prior. The KDEs are illustrated in the top right part of Figure~\ref{fig:tpe}.
 
 The last part of the algorithm yet to be described is the acquisition function. It is calculated from the KDEs using the assumption from Eq.~\ref{eqn:tpe:assumption} as
@@ -542,7 +544,7 @@ The last part of the algorithm yet to be described is the acquisition function. 
 \mathbb{P}(y \leq y^\gamma \given \mathbf{x},\mathcal{D}) \overset{\text{rank}}{\simeq} r(\mathbf{x} \given \mathcal{D}) \coloneq  \frac{p(\mathbf{x} \given \mathcal{D}^{(l)})}{p(\mathbf{x} \given \mathcal{D}^{(g)})} ,
 \]
 where the $\overset{\text{rank}}{\simeq}$ symbol means the order isomorphic between the left-hand side and the right-hand side. See Figure~\ref{fig:tpe} for illustration. The detailed pseudocode is provided in Algorithm~\ref{tpe-algo}.
-% TODO: Edit out missing references in the pseudocode.
+% TODO: Why use TPE instead of GP?
 
 \subfile{./alg/tpe-algo.tex}
 

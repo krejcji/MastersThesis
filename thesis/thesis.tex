@@ -17,6 +17,8 @@
 %%% TYPICAL FONT CHOICES (uncomment what you like) %%%
 % Recommended combo: Libertinus (autoselects Biolinum for sans) and everything
 % else (math+tt) comes from Latin Modern)
+\usepackage{cmap} % to be PDF/A compatible
+\usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage[mono=false]{libertinus}
 
@@ -41,9 +43,12 @@
 \usepackage{booktabs}
 \usepackage{caption}
 \usepackage{subcaption}
+%\usepackage{float}
+\usepackage{siunitx}
 \usepackage{floatrow}
 
 \usepackage{subfiles}
+\usepackage{interval}
 
 % Bibliography formatting.
 % CHECK THE REQUIREMENTS OF YOUR DEPARTMENT AND FACULTY ON THE CITATION FORMAT!
@@ -109,7 +114,7 @@
 
 \usepackage[noabbrev]{cleveref}
 
-\input{todos} % remove this before compiling the final version
+\input{todos} % TODO: remove this before compiling the final version
 
 \input{macros} % use this file for various custom definitions
 
@@ -129,10 +134,11 @@
 \include{bibliography}
 
 \appendix
-\include{tabular}
+%\include{bench_spec}
+\include{full_results}
 
 % if your attachments are complicated, describe them in a separate appendix
 %\include{attachments}
 
-\openright
+%\openright
 \end{document}
