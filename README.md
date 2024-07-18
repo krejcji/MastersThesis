@@ -33,7 +33,7 @@ We used the syne-tune library for running the experiments and logging the result
    
    * Example: `python src/tabular_exp/hpo_main.py --experiment_tag "test-1" --benchmark "lcbench-christine" --num_seeds 30 --n_workers 1 --method 'RS'`
 
-It is possible to re-run the experiments using these commands by running the scripts for all the `--method` and `--experiment_definition` pairs. We have used 30 seeds for tabular benchmarks, starting at the default value, and 10 seeds for the real-world experiments, starting at master_seed=40 up to 49.
+It is possible to re-run the experiments from the thesis by running these two scripts with different parameters. More precisely, for all the `--method` and `--experiment_definition` pairs. We used 30 seeds for tabular benchmarks, starting at the default value, and 10 seeds for the real-world experiments, starting at master_seed=40 up to 49.
 
 The **experiment definition** names are same as the experiment names used in the thesis for the tabular benchmarks. For real-world experiments, the experiment definitons are exactly the names of the subdirectories in the `experiment_definitions` directory. List of algorithms is provided in the Algorithms section of this document.
 
@@ -61,7 +61,7 @@ Here, we briefly summarize the experiments.
 
 ## Real-world experiments
 
-There were 7 real world experiments. Experiments are performed on several datasets, that include:
+There were 7 real world experiments. Experiments are performed on several datasets that include:
 
 * CIFAR-10 image classification dataset
 
