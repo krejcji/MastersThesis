@@ -31,7 +31,7 @@ We train machine learning algorithms by minimizing the loss function on the trai
 In the case of classification, we use the cross-entropy loss that measures the difference between two probability distributions. Let $C$ be the number of classification classes and let $y^{(i)}$ be a distribution over all classes, which will often be just a one-hot encoding of the target class. Let the predictions of the model also form a distribution over the classes. Then the loss is calculated as follows when using mean reduction across examples $$CE=-\frac{1}{N} \sum_{i=1}^{N} \sum_{c=1}^{C} y^{(i)}_c log(f(x^{(i)});\theta )_c\, .$$
 
 % More about the loss, metrics
-The loss functions depend mostly on the task, not on the specific machine learning model. The training algorithm that optimizes the loss function depends on the model though, so we will revisit optimization later. Even though the training is done exclusively with the loss function, we do not need to use the loss function for the evaluation of the model. Oftentimes a better metric, such as classification accuracy, is used instead. That holds even for hyperparameter optimization; we can optimize hyperparameters for any metric.
+The loss functions depend mostly on the task, not on the specific machine learning model. The training algorithm that optimizes the loss function depends on the model though, so we will revisit optimization later. Even though the training is done exclusively with the loss function, we do not need to use the loss function for the evaluation of the model. Oftentimes a better metric, such as classification accuracy, is used instead. That holds even for hyperparameter optimization; we can optimize hyperparameters for any metric. Later in the thesis, we will see a metric based on the receiver operating characteristic curve, or ROC curve. The name of the metric is ROC AUC because it measures the area under the curve. Very briefly, this metric measures the ability of the model to distinguish between the positive and negative classes. Thus, it is used to evaluate the performance of binary classification models. A value of 1 indicates perfect classification, while a value of 0.5 indicates that the classifier is guessing randomly.
 
 % We focus on hyperparameter optimization of neural networks since neural networks are widely used today and have many hyperparameters.
 \subsection{Deep learning}
@@ -156,8 +156,6 @@ The \textit{recurrent neural network} (RNN) architecture is designed to handle s
 \label{fig:rnn}
 \end{figure}
 
-% TODO: Transformers
-
 \subsection{Training of neural networks}
 % Training of neural networks.
 Training of the network can be split into two parts --- the forward pass and the backward pass. These two operations are repeated over and over again until some stopping criterion is met. We call one iteration an epoch. In an epoch, the training algorithm iterates through all examples in the training set, usually grouped in batches. In the forward pass, the network produces an output from the input examples and weights by iteratively going through the graph in a topological order. The loss is calculated from the output of the network and true labels. The gradients of the loss function are computed using the backpropagation algorithm, which iterates through the nodes in reverse order and calculates partial derivatives of the loss with respect to the individual weights.
@@ -165,7 +163,7 @@ Training of the network can be split into two parts --- the forward pass and the
 % Gradient descent algorithm
 After the gradients are computed, the loss function is minimized using the gradient descent algorithm. Given a loss function $L(\theta)$ that we want to minimize with respect to the weights, the gradient descent optimizes the function by taking a step in the opposite direction of gradient $\nabla_\theta L(\theta)$, which decreases the loss. That is, the weights are updated using a learning rate hyperparameter $\alpha$: $$ \theta \leftarrow \theta - \alpha \nabla_\theta L(\theta).$$
 
-For this thesis, it is enough to know there is a gradient descent algorithm optimizing the loss and this algorithm and its more advanced derivatives, such as Adam, comes with some hyperparameters. These usually include a \textit{learning rate}, a \textit{momentum}, or a \textit{decay schedule}, if we want to gradually decrease the learning rate. Later, we will also use the fact that training of neural networks is an iterative process, and it usually takes at least tens of epochs until the network starts to converge.
+For this thesis, it is enough to know there is a gradient descent algorithm optimizing the loss and this algorithm and its more advanced derivatives, such as Adam, come with some hyperparameters. These usually include a \textit{learning rate}, a \textit{momentum}, or a \textit{decay schedule}, if we want to gradually decrease the learning rate. Later, we will also use the fact that training of neural networks is an iterative process, and it usually takes at least tens of epochs until the network starts to converge.
 
 \subsection{Regularization}
 % What is regularization
@@ -208,7 +206,7 @@ For anyone interested in the process of hyperparameter tuning and how it might b
 
 \section{Classic Hyperparameter Search Techniques}
 % Manual search, grid search, random search
-The default approach for many practitioners is manual hyperparameter tuning. We cannot be surprised that people still tune hyperparameters manually. There is no technical overhead or barrier. Also, in the process of hyperparameter tuning, we gain insight into the problem, which might allow us to improve our solution in ways that are not achievable just by hyperparameter tuning. Nevertheless, there are clear limits to manual tuning so let us dive into the algorithmic approaches. The traditional algorithms for hyperparameter optimization are grid search and random search. These algorithms are simple and still widely used.
+The default approach for many practitioners is manual hyperparameter tuning. We cannot be surprised that people still tune hyperparameters manually. There is no technical overhead or barrier. Also, in the process of hyperparameter tuning, we gain insight into the problem, which might allow us to improve our solution in ways that are not achievable just by hyperparameter tuning. Nevertheless, there are clear limits to manual tuning, so let us dive into the algorithmic approaches. The traditional algorithms for hyperparameter optimization are grid search and random search. These algorithms are simple and still widely used.
 
 \paragraph{Grid Search} Grid search performs an exhaustive search through a manually specified subset of the hyperparameter space. Grid search is best used when the number of hyperparameters is small, or the function evaluation is not that expensive. Its biggest drawback is that the number of configurations to evaluate grows exponentially with the number of hyperparameters. Therefore, it is best to determine which hyperparameters are the most important and limit the search only to this subset. If we did not do this, we would waste a lot of computational resources on hyperparameter combinations, where only the unimportant hyperparameter changes, but the important ones stay the same. We illustrate this situation in Figure~\ref{fig:grid}. To mitigate this, we would need a way to determine which hyperparameters are important and need to be tuned together, which is a hard problem itself. On the other hand, grid search is easily parallelizable. That is an enormous advantage since in real-world scenarios, it is not uncommon to have access to a computing cluster.
 
@@ -227,7 +225,7 @@ The default approach for many practitioners is manual hyperparameter tuning. We 
 
 \section{Bayesian optimization}
 % Going from model-less to model-based approaches
-So far, we have seen model-less approaches, where each trial is independent. This approach offers some advantages, like parallelization and simplicity of implementation, but it is quite inefficient. Information obtained from previous trials is not used in any way to guide the search. Bayesian optimization methods build and use an internal model of the learning algorithm's generalization performance. Bayesian optimization is widely covered in literature, we will use the work of Brochu et al.~\cite{brochu2010tutorial} and Frazier~\cite{frazier2018tutorial} for the definitions and the description of the method.
+So far, we have seen model-less approaches, where each trial is independent. This approach offers some advantages, like parallelization and simplicity of implementation, but it is quite inefficient. Information obtained from previous trials is not used in any way to guide the search. Bayesian optimization methods build and use an internal model of the learning algorithm's generalization performance. Bayesian optimization is widely covered in literature; we will use the work of Brochu et al.~\cite{brochu2010tutorial} and Frazier~\cite{frazier2018tutorial} for the definitions and the description of the method.
 
 % What is BO and history
 % Before mockus was Kushner 1964 and Zilinkas 1975 - 2nd page of Frazier 2018
@@ -312,14 +310,13 @@ Expected improvement (EI)~\cite{jones1998efficient} enhances PI by considering t
 \[
 \frac{1}{\sqrt{2 \pi}\sigma(x)} \text{exp}\left(-\frac{(\mu(x)-y^*-I)^2}{2\sigma^2(x)}\right).
 \]
-% TODO: Is the random variable notation used correctly here for $I(x)$? Is it a problem that we cut off the improvement at 0? Probably Okay
 
 The expected value is calculated by integrating the density function multiplied by the improvement:
 \[ EI(x) = \mathbb{E}[I(x)] = \int_{I=0}^{I=\infty} I\frac{1}{\sqrt{2 \pi}\sigma(x)} exp\left(-\frac{(\mu(x)-y^*-I)^2}{2\sigma^2(x)}\right) dI. \]
 The analytical solution to this integral can be found in the literature~\cite{jones1998efficient} and it is as follows:
 \[ EI(x) = (\mu(x)-y^*)\Phi(Z)+\sigma(x)\phi(Z), \]
 where
-\[ Z=\frac{\mu(x)-y^*}{\sigma(x),} \]
+\[ Z=\frac{\mu(x)-y^*}{\sigma(x)}, \]
 and $\phi$ is the density of the normal distribution.
 
 Even the expected improvement can be extended with parameter $\xi$ as in the PI acquisition function. The role of this parameter stays the same; it enables us to balance exploration and exploitation. The modified acquisition function is
@@ -544,12 +541,9 @@ The last part of the algorithm yet to be described is the acquisition function. 
 \mathbb{P}(y \leq y^\gamma \given \mathbf{x},\mathcal{D}) \overset{\text{rank}}{\simeq} r(\mathbf{x} \given \mathcal{D}) \coloneq  \frac{p(\mathbf{x} \given \mathcal{D}^{(l)})}{p(\mathbf{x} \given \mathcal{D}^{(g)})} ,
 \]
 where the $\overset{\text{rank}}{\simeq}$ symbol means the order isomorphic between the left-hand side and the right-hand side. See Figure~\ref{fig:tpe} for illustration. The detailed pseudocode is provided in Algorithm~\ref{tpe-algo}.
-% TODO: Why use TPE instead of GP?
+
 
 \subfile{./alg/tpe-algo.tex}
-
-% \subsubsection{Components and control parameters}
-% \xxx{In this section, we will look at how the different components and control parameters change the behavior of the algorithm}. We start with the \emph{splitting algorithm}, which is used to split the observations $\D$ into $\Dl$ and $\Dg$. Weighting Algorithm. Kernel Functions (numerical, categorical, univariate vs multivariate). Bandwidth. Non-informative prior. \xxx{Will I have to go into such a details?}
 
 \subsection{Random Forest}
 The last Bayesian optimization surrogate that we are going to introduce is the random forest model. This approach was first introduced by Hutter et al.~\cite{hutter2010sequential} as SMAC, which stands for Sequential Model-based Algorithm Configuration. It was published as an alternative to the Gaussian processes for the general algorithm configuration problem, approximately at the same time as the TPE.\@ The random forest surrogate is still widely used, mostly in the updated SMAC3 Python package~\cite{smac3}.

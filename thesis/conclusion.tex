@@ -4,8 +4,7 @@
 % Where in the research map is my thesis - mention some work that has been done
 %       - on HPO in general
 %       - on comparisons
-% To what extent did we responded to the gap in research
-
+% To what extent did we respond to the gap in research
 
 % We did perform quite a lot of new experiments, more than would be possible on just a single personal computer.
 
@@ -16,6 +15,3 @@ Numerous hyperparameter optimization algorithms are available for deployment, ma
 We found that by using an advanced algorithm, it is often possible to obtain a solution comparable to a solution found by random search, but using just a fraction of the budget. On tabular experiments, DyHPO achieved an average speedup factor of $6.92$ compared to random search. DyHPO proved to be one of the best algorithms in the comparison, achieving the best average rank on both tabular and real-world experiments, closely followed by HyperTune. One thing to note is that DyHPO can have a large overhead depending on the implementation. The results of the real-world experiments were more varied, which is why including diverse tasks and architectures in comparisons is needed. We did not find any major discrepancies between tabular and real-world experiments, suggesting that tabular benchmarks still provide a good general estimate of performance.
 
 However, some limitations are worth noting. Most importantly, the data obtained from the real-world experiments were noisy, and 10 repetitions were insufficient to uncover more statistically supported findings. Moreover, the problems solved in the real-world experiments were still orders of magnitude simpler than some problems currently solved by machine learning, even though we included more recent architectures and often larger search spaces than tabular benchmarks. Future work should therefore focus on extending the diversity of tasks, e.g.\ by including NLP or reinforcement learning tasks; and performing more repetitions for more reliable results. Moreover, creating a new set of tabular benchmarks with more recent problems would also be valuable, as tabular benchmarks are useful not only for comparisons but more importantly for the development of new algorithms.
-
-
-% Considering the field of hyperparameter optimization more broadly, we think that subsampling is an underexplored area of research as a means to improve the efficiency of the search. The existing methods did not catch up though, probably because they introduce yet another barrier for practitioners --- the datasets have to support subsampling. Nevertheless, we think that experimenting with coresets or some other way of subsampling shows a potential for another speed-up of the hyperparameter optimization.

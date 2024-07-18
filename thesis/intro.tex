@@ -25,29 +25,13 @@
 
 % Introduction should answer the following questions, ideally in this order
 
-%In this thesis, we address the problem of hyperparameter tuning of deep neural networks. The most common way to tune hyperparameters still to this day is by hand, by trial and error, relying on previous experience and various rules of thumb. Tuning hyperparameters this way is a time-consuming task and requires a great deal of expertise to do efficiently and well. Methods like random search are also employed, but just as the computing power grows each year, the complexity of machine learning models grows even faster. Consequently, the need for more efficient methods is of growing interest. Moreover, an algorithm can do the task more thoroughly while saving human effort.
-
-
 % What is the nature of the problem the thesis is addressing?
 Hyperparameter optimization is an important step in the machine learning workflow that can have a striking effect on model generalization and performance. Historically, the most prevalent approaches to hyperparameter optimization were tuning the hyperparameters manually, using a random search, or a grid search. A breakthrough in the field was the adaptation of Bayesian optimization~\cite{mockus1974bayesian,snoek2012practical}, which uses probabilistic models to predict the performance of hyperparameter configurations to make an informed decision about which configuration to evaluate next. Nevertheless, as the complexity of machine learning models has increased rapidly in recent years, not even Bayesian optimization alone might be feasible for many tasks. The next step seems to be the multi-fidelity hyperparameter tuning, which makes use of cheap but unreliable evaluations, often combined with Bayesian optimization.
 
-% The therefore does not fit in very well
-
-%Even though this is an extensively studied problem, there is still no consensus on which method performs best. In this thesis, we expand on the knowledge of these algorithms and conduct experiments on image data; and also in the healthcare domain.
-
-%The main issue is that the function we optimize is expensive to evaluate and the range of possible input values is vast. One function evaluation, or training the network, can take hours or days. That is why the classical methods for hyperparameter optimization in machine learning such as grid search are not applicable to more complex deep learning architectures. Therefore, more sophisticated methods and algorithms were developed and are still being researched. The most important metric in this field is the efficiency of the search.
-
 % What is the common approach for solving that problem now?
-% Hyperparameter optimization has roots in black-box optimization techniques. The machine learning models act as a black-box system to an extent. In deep learning, there is some potential to exploit the knowledge of the system, but only to a small degree. Many tools and optimization frameworks exist for hyperparameter tuning. Most of them are even open source, such as Optuna~\cite{akiba2019optuna} or SMAC3~\cite{smac3}. These tuning tools usually use Bayesian optimization techniques internally. Bayesian optimization is well suited for global optimization of black-box, expensive-to-evaluate functions.
-
-
 % How this thesis approaches the problem?
 % What are the results? Did something improve?
 We conduct a literature survey on state-of-the-art hyperparameter optimization methods. Additionally, we examine the underlying principles of these methods, explaining the most important ideas and their practical implications. Our research found that limited performance comparisons of hyperparameter optimization algorithms were available. Therefore, instead of developing a new algorithm, we carried out experiments to compare the most promising algorithms across various tasks. These tasks include tabular benchmarks as well as real-world deep-learning problems. In addition to the usual image datasets, we chose two datasets from the healthcare domain, too. The results of the experiments confirm that multi-fidelity techniques are superior to random search, but no single algorithm consistently outperforms others across all tasks.
-
-% UPDATE
-% We have found that the research on the performance of the hyperparameter optimization algorithms is limited. Only when a new algorithm is published does the author a comparison. However, there is not a standardized and diverse set of experiments.   we perform a set of experiments to compare the most promising algorithms on a diverse range of tasks. These tasks include tabular benchmarks as well as real-world deep-learning problems. In addition to the usual image datasets, we chose two datasets from the healthcare domain, too. The results of the experiments confirm that multi-fidelity techniques are superior to random search, but no single algorithm consistently outperforms others across all tasks.
-
 
 % that will do well on any problem?
 % add more information about the multi-fidelity
